@@ -1,7 +1,6 @@
 #include<Servo.h>
 Servo myservo;
 int duration;
-float distance;
 float dis;
 float left_dis;
 float right_dis;
@@ -30,38 +29,53 @@ void setup()
 }
 void loop()
 {
-	while(Serial.available())
-   {
-     char c=Serial.read();
-       if(c=='w')
-        {
-          Serial.write("forward\n"); 
-          forward();
-          delay(1000);
-          stop();
-        }
-       else if(c=='s')
-        {
-          Serial.write("backward\n"); 
-          backward();
-          delay(1000);
-          stop();
-        }
-        else if(c=='a')
-        {
-        	Serial.write("left\n"); 
-          	left();
-            delay(1000);
-          	stop();
-        }
-        else if(c=='d')
-        {
-        	Serial.write("right\n"); 
-          	right();
-          	          delay(1000);
-          stop();
-        }
-	 }
+
+	forward();
+	while((dis=(Ultrasonic()+Ultrasonic()+Ultrasonic())/3)>30){Serial.println("go");};  //前方距离超过40cm的时候一直往前走
+	if( (dis=Ultrasonic())<30 )
+	{
+        Serial.print("front_distance=");
+		Serial.print(dis);
+		Serial.println("cm"); 
+		backward();
+		delay(200);  //检测到前方有障碍物的时候 先向后退一点
+		stop();
+		myservo.write(179);
+		delay(1000);
+		left_dis=Ultrasonic();
+		Serial.print("left_distance=");
+		Serial.print(left_dis);
+		Serial.println("cm"); 
+		myservo.write(1);
+		delay(1000);
+		right_dis=Ultrasonic();
+		myservo.write(90);
+		delay(1000);
+		if(30<left_dis<right_dis)
+			{
+				Serial.println("Turn right");
+				right();
+				delay(1000); //90度
+				forward(); //保证转弯之后再往前走一点，防止原地打转
+				delay(500);
+				stop();
+			}
+		else if(30<right_dis<left_dis)
+			{
+				Serial.println("Turn left");
+				left();
+				delay(1000);
+				forward(); //保证转弯之后再往前走一点，防止原地打转
+				delay(500);
+				stop();
+			}
+		else{
+			backward();
+			delay(1000);
+			stop();
+		}					
+	}
+	else;
 }
 void forward()
 {
@@ -71,6 +85,7 @@ void forward()
 	digitalWrite(I1,LOW);
 	digitalWrite(I3,HIGH);//使直流电机正转
 	digitalWrite(I4,LOW); 
+	return ;
 }
 void backward()
 {
@@ -80,26 +95,27 @@ void backward()
 	digitalWrite(I1,HIGH);
 	digitalWrite(I3,LOW);//使直流电机倒转
 	digitalWrite(I4,HIGH);
+	return ;
 }
 void right()
 {
-	analogWrite(EA,150);
-	analogWrite(EB,150);
+	analogWrite(EA,255); //把占空比调高一点儿就能转动了
+	analogWrite(EB,255);
 	digitalWrite(I2,HIGH);//使直流电机正转
 	digitalWrite(I1,LOW);
 	digitalWrite(I3,LOW);//使直流电机正转
 	digitalWrite(I4,HIGH); 
-	delay(200);
+	return ;
 }
 void left()
 {
-	analogWrite(EA,150);
-	analogWrite(EB,150);
+	analogWrite(EA,255);
+	analogWrite(EB,255);
 	digitalWrite(I2,LOW);//使直流电机正转
 	digitalWrite(I1,HIGH);
 	digitalWrite(I3,HIGH);//使直流电机正转
 	digitalWrite(I4,LOW); 
-	delay(200);
+	return ;
 }
 void stop()
 {
@@ -107,9 +123,12 @@ void stop()
 	digitalWrite(I1,LOW);
 	digitalWrite(I3,LOW);
 	digitalWrite(I4,LOW); 
+	return ;
 }
+
 int Ultrasonic()
 {
+	float distance;
 	digitalWrite(TrigPin,LOW);//高电平出发前发送2ms低电平
 	delayMicroseconds(2);
 	digitalWrite(TrigPin,HIGH);//发送10微秒的高电平开始检测 

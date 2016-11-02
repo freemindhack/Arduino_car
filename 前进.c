@@ -30,38 +30,13 @@ void setup()
 }
 void loop()
 {
-	while(Serial.available())
-   {
-     char c=Serial.read();
-       if(c=='w')
-        {
-          Serial.write("forward\n"); 
-          forward();
-          delay(1000);
-          stop();
-        }
-       else if(c=='s')
-        {
-          Serial.write("backward\n"); 
-          backward();
-          delay(1000);
-          stop();
-        }
-        else if(c=='a')
-        {
-        	Serial.write("left\n"); 
-          	left();
-            delay(1000);
-          	stop();
-        }
-        else if(c=='d')
-        {
-        	Serial.write("right\n"); 
-          	right();
-          	          delay(1000);
-          stop();
-        }
-	 }
+	
+	forward();
+	delay(4000);
+	right();//调用前进子程序
+	delay(5000);
+	left();
+    delay(5000);
 }
 void forward()
 {
@@ -74,8 +49,8 @@ void forward()
 }
 void backward()
 {
-	analogWrite(EA,120);//输入模拟值进行设定速度
-	analogWrite(EB,120);
+	analogWrite(EA,100);//输入模拟值进行设定速度
+	analogWrite(EB,100);
 	digitalWrite(I2,LOW);//使直流电机倒转
 	digitalWrite(I1,HIGH);
 	digitalWrite(I3,LOW);//使直流电机倒转
@@ -83,23 +58,23 @@ void backward()
 }
 void right()
 {
-	analogWrite(EA,150);
-	analogWrite(EB,150);
+	analogWrite(EA,255);
+	analogWrite(EB,255);
 	digitalWrite(I2,HIGH);//使直流电机正转
 	digitalWrite(I1,LOW);
 	digitalWrite(I3,LOW);//使直流电机正转
 	digitalWrite(I4,HIGH); 
-	delay(200);
+	delay(2500);
 }
 void left()
 {
-	analogWrite(EA,150);
-	analogWrite(EB,150);
+	analogWrite(EA,255);
+	analogWrite(EB,255);
 	digitalWrite(I2,LOW);//使直流电机正转
 	digitalWrite(I1,HIGH);
 	digitalWrite(I3,HIGH);//使直流电机正转
 	digitalWrite(I4,LOW); 
-	delay(200);
+	delay(2500);
 }
 void stop()
 {
